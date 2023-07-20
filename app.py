@@ -18,6 +18,52 @@ def show_data(tabs, df_arr):
         with tabs[i]:
             st.dataframe(df_)
 
+def decode_response(response: str) -> dict:
+    """This function converts the string response from the model to a dictionary object.
+
+    Args:
+        response (str): response from the model
+
+    Returns:
+        dict: dictionary with response data
+    """
+    return json.loads(response)
+
+def write_response(response_dict: dict):
+    """
+    Write a response from an agent to a Streamlit app.
+
+    Args:
+        response_dict: The response from the agent.
+
+    Returns:
+        None.
+    """
+
+    # Check if the response is an answer.
+    if "answer" in response_dict:
+        st.write(response_dict["answer"])
+
+    # Check if the response is a bar chart.
+    if "bar" in response_dict:
+        data = response_dict["bar"]
+        df = pd.DataFrame(data)
+        df.set_index("columns", inplace=True)
+        st.bar_chart(df)
+
+    # Check if the response is a line chart.
+    if "line" in response_dict:
+        data = response_dict["line"]
+        df = pd.DataFrame(data)
+        df.set_index("columns", inplace=True)
+        st.line_chart(df)
+
+    # Check if the response is a table.
+    if "table" in response_dict:
+        data = response_dict["table"]
+        df = pd.DataFrame(data["data"], columns=data["columns"])
+        st.table(df)
+
 def main():
     st.title("Pandas AI Agent - Demo")
     openai_key = st.sidebar.text_input('Open AI API KEY', key="openai_key", type="password")
@@ -67,6 +113,14 @@ def main():
         print(user_input, len(user_input))
         response, thought, action, action_input, observation = run_query(agent, user_input)
         #st.write("Pandas Agent: ")
+        # Query the agent.
+        response = query_agent(agent=agent, query=user_input)
+
+        # Decode the response.
+        decoded_response = decode_response(response)
+
+        # Write the response to the Streamlit app.
+        write_response(decoded_response)
         st.session_state.past.append(user_input)
         st.session_state.generated.append(response)
         for i in range(len(st.session_state['generated'])-1, -1, -1):

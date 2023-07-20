@@ -72,3 +72,5 @@ When using or modifying this tool do always give appropriate credit.
 * [Open AI Model](https://platform.openai.com/)
 * [StreamLit Python](https://docs.streamlit.io/)
 * [Pandas AI Library](https://python.langchain.com/en/latest/modules/agents/toolkits/examples/pandas.html)
+
+key: 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
