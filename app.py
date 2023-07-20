@@ -10,19 +10,7 @@ import streamlit as st
 import numpy as np
 import subprocess
 
-def generate_plot():
-    # Sample data for the plot
-    x = np.linspace(0, 10, 100)
-    y = np.sin(x)
 
-    # Create the plot
-    fig, ax = plt.subplots()
-    ax.plot(x, y)
-    ax.set_xlabel('X-axis')
-    ax.set_ylabel('Y-axis')
-    ax.set_title('Sample Plot')
-
-    return fig
 
 def setOpenAIKey(key):
     os.environ['OPENAI_API_KEY'] = key
@@ -67,8 +55,6 @@ def main():
             subprocess.Popen(["explorer", current_dir])
         else:
             print("Directory opened:", current_dir)
-
-
     imgs_png = glob.glob('*.png')
     imgs_jpg = glob.glob('*.jpg')
     imgs_jpeeg = glob.glob('*.jpeg')
