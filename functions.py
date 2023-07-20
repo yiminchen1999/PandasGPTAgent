@@ -6,6 +6,12 @@ import pandas as pd
 import glob
 import json
 from datetime import datetime
+import environ
+
+env = environ.Env()
+environ.Env.read_env()
+
+OPENAI_API_KEY = env("apikey")
 
 def save_chart(query):
     q_s = ' If any charts or graphs or plots were created save them localy and include the save file names in your response.'

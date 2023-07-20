@@ -7,7 +7,12 @@ from functions import *
 import openai
 from streamlit_chat import message
 from streamlit_image_select import image_select
-os.environ['OPENAI_API_KEY'] = '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'
+import environ
+
+env = environ.Env()
+environ.Env.read_env()
+
+OPENAI_API_KEY = env("apikey")
 
 def get_text(n):
     input_text = st.text_input('How can I help?', '', key="input{}".format(n))
@@ -64,26 +69,26 @@ def write_response(response_dict: dict):
         df = pd.DataFrame(data["data"], columns=data["columns"])
         st.table(df)
 
-    def main():
-        st.title("Pandas AI Agent - Demo")
-        st.sidebar.title('🤖 Thinking Process 🤖')
+def main():
+    st.title("Pandas AI Agent - Demo")
+    st.sidebar.title('🤖 Thinking Process 🤖')
 
-        # Get the list of CSV files in a specific directory
-        csv_directory = '/path/to/your/csv/directory'
-        csv_files = glob.glob(os.path.join(csv_directory, '*.csv'))
+    # Get the list of CSV files in a specific directory
+    csv_directory = '/Users/chenyimin/PycharmProjects/PandasGPTAgent/csv'
+    csv_files = glob.glob(os.path.join(csv_directory, '*.csv'))
 
-        if csv_files:
-            selected_df_names = [os.path.basename(file) for file in csv_files]
-            selected_df = [pd.read_csv(file) for file in csv_files]
-            st.session_state["tabs"].clear()
-            for df_name in selected_df_names:
-                st.session_state.tabs.append(df_name)
-            tabs = st.tabs([s.center(9, "\u2001") for s in st.session_state["tabs"]])
-            show_data(tabs, selected_df)
+    if csv_files:
+        selected_df_names = [os.path.basename(file) for file in csv_files]
+        selected_df = [pd.read_csv(file) for file in csv_files]
+        st.session_state["tabs"].clear()
+        for df_name in selected_df_names:
+            st.session_state.tabs.append(df_name)
+        tabs = st.tabs([s.center(9, "\u2001") for s in st.session_state["tabs"]])
+        show_data(tabs, selected_df)
 
-        st.header("AI Agent Output Directory")
-        if st.button('Open Directory'):
-            os.startfile(os.getcwd())
+    st.header("AI Agent Output Directory")
+    if st.button('Open Directory'):
+        os.startfile(os.getcwd())
 
     imgs_png = glob.glob('*.png')
     imgs_jpg = glob.glob('*.jpg')
