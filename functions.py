@@ -17,8 +17,7 @@ def save_uploaded_file(uploaded_file):
         f.write(uploaded_file.getbuffer())
     df_arr, df_arr_names = load_dataframe()
 
-    agent = create_pandas_dataframe_agent(
-   OpenAI(temperature=0), df_arr, return_intermediate_steps=True, save_charts=True, verbose=True)
+    agent = create_pandas_dataframe_agent(OpenAI(temperature=0), df_arr, return_intermediate_steps=True, save_charts=True, verbose=True)
     return agent, df_arr, df_arr_names
 
 def load_dataframe():
