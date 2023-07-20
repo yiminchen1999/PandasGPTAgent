@@ -7,17 +7,98 @@ import glob
 import json
 from datetime import datetime
 import environ
+from typing import Any, List, Optional
+from langchain.agents.agent import AgentExecutor
+from langchain.agents import ZeroShotAgent
+from langchain.callbacks.base import BaseCallbackManager
+from langchain.chains.llm import LLMChain
+from langchain.llms.base import BaseLLM
+from langchain.tools.python.tool import PythonAstREPLTool
+from langchain.memory import ConversationBufferMemory
 
+memory = ConversationBufferMemory(memory_key="chat_history")
+
+#store the memory
+def memory(
+        llm: BaseLLM,
+        df: Any,
+        callback_manager: Optional[BaseCallbackManager] = None,
+        input_variables: Optional[List[str]] = None,
+        verbose: bool = False,
+        return_intermediate_steps: bool = False,
+        max_iterations: Optional[int] = 15,
+        max_execution_time: Optional[float] = None,
+        early_stopping_method: str = "force",
+        **kwargs: Any,
+) -> AgentExecutor:
+    """Construct a pandas agent from an LLM and dataframe."""
+    import pandas as pd
+
+    if not isinstance(df, pd.DataFrame):
+        raise ValueError(f"Expected pandas object, got {type(df)}")
+    if input_variables is None:
+        input_variables = ["df", "input", "agent_scratchpad"]
+    tools = [PythonAstREPLTool(locals={"df": df})]
+
+    PREFIX = """
+            You are working with a pandas dataframe in Python. The name of the dataframe is `df`.
+            You should use the tools below to answer the question posed of you:"""
+
+    SUFFIX = """
+            This is the result of `print(df.head())`:
+            {df}
+            Begin!
+            {chat_history}
+            Question: {input}
+            {agent_scratchpad}"""
+
+    prompt = ZeroShotAgent.create_prompt(
+        tools,
+        prefix=PREFIX,
+        suffix=SUFFIX,
+        input_variables=["df", "input", "chat_history", "agent_scratchpad"]
+    )
+
+    print(prompt)
+
+    partial_prompt = prompt.partial(df=str(df.head()))
+
+    llm_chain = LLMChain(
+        llm=llm,
+        prompt=partial_prompt,
+        callback_manager=callback_manager,
+    )
+
+    tool_names = [tool.name for tool in tools]
+
+    agent = ZeroShotAgent(
+        llm_chain=llm_chain,
+        allowed_tools=tool_names,
+        callback_manager=callback_manager,
+        **kwargs,
+    )
+    return AgentExecutor.from_agent_and_tools(
+        agent=agent,
+        tools=tools,
+        verbose=verbose,
+        return_intermediate_steps=return_intermediate_steps,
+        max_iterations=max_iterations,
+        max_execution_time=max_execution_time,
+        early_stopping_method=early_stopping_method,
+        callback_manager=callback_manager,
+        memory=memory
+    )
 
 def save_chart(query):
     q_s = ' If any charts or graphs or plots were created save them localy and include the save file names in your response.'
     query += ' . '+ q_s
     return query
+
 def save_uploaded_file(uploaded_file):
     with open(uploaded_file.name, "wb") as f:
         f.write(uploaded_file.getbuffer())
     df_arr, df_arr_names = load_dataframe()
-
+#
     agent = create_pandas_dataframe_agent(OpenAI(temperature=0), df_arr, return_intermediate_steps=True, save_charts=True, verbose=True)
     return agent, df_arr, df_arr_names
 

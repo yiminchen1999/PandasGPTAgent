@@ -41,12 +41,11 @@ def show_data(tabs, df_arr):
 
 
 def main():
-    st.title("Pandas AI Agent - Demo")
+    st.title("Demo Agent")
     openai_key = st.sidebar.text_input('Open AI API KEY', key="openai_key", type="password")
     if st.sidebar.button('Update Key'):
         setOpenAIKey(openai_key)
     st.sidebar.title('Thinking Process')
-    st.header("Add Dataframes")
     uploaded_file = st.file_uploader("Choose files to upload (csv, xls, xlsx)", type=["csv", "xls", "xlsx"],
                                      accept_multiple_files=True)
     agent = ''
@@ -92,7 +91,7 @@ def main():
         for i in range(len(st.session_state['generated']) - 1, -1, -1):
             message(st.session_state["generated"][i], key=str(i))
             message(st.session_state['past'][i], is_user=True, key=str(i) + '_user')
-            st.write(img)
+
 
         # Display the plots
         for i in range(0, len(thought)):
