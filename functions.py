@@ -65,6 +65,7 @@ def run_query(agent, query_):
 def decode_intermediate_steps(steps):
     log, thought_, action_, action_input_, observation_ = [], [], [], [], []
     text = ''
+    #把thinking process extract出来
     for step in steps:
         thought_.append(':green[{}]'.format(step[0][2].split('Action:')[0]))
         action_.append(':green[Action:] {}'.format(step[0][2].split('Action:')[1].split('Action Input:')[0]))
@@ -75,7 +76,7 @@ def decode_intermediate_steps(steps):
         text = step[0][2] + ' Observation: {}'.format(step[1])
     return thought_, action_, action_input_, observation_, text
 
-
+#chat history
 def get_convo():
     convo_file = 'convo_history.json'
     with open(convo_file, 'r', encoding='utf-8') as f:
